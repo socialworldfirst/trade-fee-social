@@ -535,18 +535,25 @@ function render(){
   $('wfReceives').textContent=fmt(wfReceives);
   $('wfDetail').textContent=wf.label;
 
-  // Expand bodies
+  // Expand bodies — bank has multiple fee layers from corridor research
   const bankFxCost=amt*(bankFx/100);
+  const corrFee=amt>=50000?40:25; // correspondent/intermediary deduction, scales with amount
+  const rxFee=15; // Chinese receiving bank fee (typical)
+  const bankAllIn=bankFxCost+bankWire+corrFee+rxFee;
   $('bankExpandBody').innerHTML=
     `<div class="expand-row"><span class="el">FX markup (~${bankFx.toFixed(1)}%)</span><span class="ev">${fmt(bankFxCost)}</span></div>`+
     (bankWire>0?`<div class="expand-row"><span class="el">Wire / SWIFT fee</span><span class="ev">${fmt(bankWire)}</span></div>`:'')+
-    `<div class="expand-row"><span class="el"><strong>Total fees</strong></span><span class="ev"><strong>${fmt(bankCost)}</strong></span></div>`;
+    `<div class="expand-row"><span class="el">Correspondent bank fee</span><span class="ev">${fmt(corrFee)}</span></div>`+
+    `<div class="expand-row"><span class="el">China receiving fee</span><span class="ev">${fmt(rxFee)}</span></div>`+
+    `<div class="expand-row"><span class="el"><strong>Total fees</strong></span><span class="ev"><strong>${fmt(bankAllIn)}</strong></span></div>`;
 
   const wfFxCost=amt*(wf.fx/100);
   const wfPayCost=amt*(wf.pay/100);
   $('wfExpandBody').innerHTML=
     `<div class="expand-row"><span class="el">FX (${wf.fx}%)</span><span class="ev">${fmt(wfFxCost)}</span></div>`+
     `<div class="expand-row"><span class="el">Payment fee (${wf.pay}%)</span><span class="ev">${fmt(wfPayCost)}</span></div>`+
+    `<div class="expand-row"><span class="el">Correspondent bank fee</span><span class="ev">$0</span></div>`+
+    `<div class="expand-row"><span class="el">China receiving fee</span><span class="ev">$0</span></div>`+
     `<div class="expand-row"><span class="el"><strong>Total fees</strong></span><span class="ev"><strong>${fmt(wfCost)}</strong></span></div>`;
 
   // Savings strip
