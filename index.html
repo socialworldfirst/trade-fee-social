@@ -506,7 +506,9 @@ function render(){
     bankWire=bank.w;
     bankLabel=bank.n;
   }
-  const bankCost=amt*(bankFx/100)+bankWire;
+  const corrFee=amt>=50000?40:25;
+  const rxFee=15;
+  const bankCost=amt*(bankFx/100)+bankWire+corrFee+rxFee;
   const bankReceives=amt-bankCost;
 
   // WF cost
@@ -535,11 +537,8 @@ function render(){
   $('wfReceives').textContent=fmt(wfReceives);
   $('wfDetail').textContent=wf.label;
 
-  // Expand bodies — bank has multiple fee layers from corridor research
+  // Expand bodies
   const bankFxCost=amt*(bankFx/100);
-  const corrFee=amt>=50000?40:25;
-  const rxFee=15;
-  const bankAllIn=bankFxCost+bankWire+corrFee+rxFee;
   // Bank route: local currency → USD → CNY (double conversion via SWIFT)
   const selCurCode=document.getElementById('curSelect').value;
   const localCur=r.cur;
@@ -551,7 +550,7 @@ function render(){
     (bankWire>0?`<div class="expand-row"><span class="el">Wire / SWIFT fee</span><span class="ev">${fmt(bankWire)}</span></div>`:'')+
     `<div class="expand-row"><span class="el">Correspondent bank fee</span><span class="ev">${fmt(corrFee)}</span></div>`+
     `<div class="expand-row"><span class="el">China receiving fee</span><span class="ev">${fmt(rxFee)}</span></div>`+
-    `<div class="expand-row"><span class="el"><strong>Total fees</strong></span><span class="ev"><strong>${fmt(bankAllIn)}</strong></span></div>`;
+    `<div class="expand-row"><span class="el"><strong>Total fees</strong></span><span class="ev"><strong>${fmt(bankCost)}</strong></span></div>`;
 
   // WF route: local currency → CNY direct (CNAPS, no SWIFT)
   const wfFxCost=amt*(wf.fx/100);
