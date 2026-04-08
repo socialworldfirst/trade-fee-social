@@ -538,20 +538,16 @@ function render(){
   // Expand bodies
   const bankFxCost=amt*(bankFx/100);
   $('bankExpandBody').innerHTML=
-    `<div class="expand-row"><span class="el">You send</span><span class="ev">${fmt(amt)}</span></div>`+
-    `<div class="expand-row"><span class="el">FX markup (~${bankFx.toFixed(1)}%)</span><span class="ev">\u2212${fmt(bankFxCost)}</span></div>`+
-    (bankWire>0?`<div class="expand-row"><span class="el">Wire / SWIFT fee</span><span class="ev">\u2212${fmt(bankWire)}</span></div>`:'')+
-    `<div class="expand-row"><span class="el">Total cost</span><span class="ev">\u2212${fmt(bankCost)}</span></div>`+
-    `<div class="expand-row"><span class="el">Supplier receives</span><span class="ev">${fmt(bankReceives)}</span></div>`;
+    `<div class="expand-row"><span class="el">FX markup (~${bankFx.toFixed(1)}%)</span><span class="ev">${fmt(bankFxCost)}</span></div>`+
+    (bankWire>0?`<div class="expand-row"><span class="el">Wire / SWIFT fee</span><span class="ev">${fmt(bankWire)}</span></div>`:'')+
+    `<div class="expand-row"><span class="el"><strong>Total fees</strong></span><span class="ev"><strong>${fmt(bankCost)}</strong></span></div>`;
 
   const wfFxCost=amt*(wf.fx/100);
   const wfPayCost=amt*(wf.pay/100);
   $('wfExpandBody').innerHTML=
-    `<div class="expand-row"><span class="el">You send</span><span class="ev">${fmt(amt)}</span></div>`+
-    `<div class="expand-row"><span class="el">FX (${wf.fx}%)</span><span class="ev">\u2212${fmt(wfFxCost)}</span></div>`+
-    `<div class="expand-row"><span class="el">Payment fee (${wf.pay}%)</span><span class="ev">\u2212${fmt(wfPayCost)}</span></div>`+
-    `<div class="expand-row"><span class="el">Total cost</span><span class="ev">\u2212${fmt(wfCost)}</span></div>`+
-    `<div class="expand-row"><span class="el">Supplier receives</span><span class="ev">${fmt(wfReceives)}</span></div>`;
+    `<div class="expand-row"><span class="el">FX (${wf.fx}%)</span><span class="ev">${fmt(wfFxCost)}</span></div>`+
+    `<div class="expand-row"><span class="el">Payment fee (${wf.pay}%)</span><span class="ev">${fmt(wfPayCost)}</span></div>`+
+    `<div class="expand-row"><span class="el"><strong>Total fees</strong></span><span class="ev"><strong>${fmt(wfCost)}</strong></span></div>`;
 
   // Savings strip
   const strip=$('savingsStrip');
