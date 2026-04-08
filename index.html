@@ -380,7 +380,7 @@ function populateBanks(){
   const r=D[region];
   bankSelect.innerHTML='';
   const avg=document.createElement('option');
-  avg.value='avg';avg.textContent=r.name+' banks (avg)';
+  avg.value='avg';avg.textContent='Banks (avg)';
   bankSelect.appendChild(avg);
   r.banks.forEach((b,i)=>{
     const o=document.createElement('option');o.value=i;o.textContent=b.n;bankSelect.appendChild(o);
@@ -462,7 +462,7 @@ function render(){
   if(useAvg){
     bankFx=r.bankAvg;
     bankWire=0;
-    bankLabel=r.name+' banks (avg)';
+    bankLabel='Banks (avg)';
   } else {
     bankFx=bank.fx;
     bankWire=bank.w;
