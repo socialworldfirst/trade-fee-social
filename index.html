@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Trade Fee Compare — WorldFirst</title>
+<style>
+:root {
+  --bank-bg: #F3F3F3;
+  --bank-text: #666;
+  --bank-num: #333;
+  --wf-bg: #111;
+  --wf-text: rgba(255,255,255,.6);
+  --wf-num: #fff;
+  --save-bg: #059669;
+  --save-text: #fff;
+  --input-bg: #fff;
+  --border: #E5E5E5;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'SF Mono','Consolas','Menlo',monospace;
+  background: #fff;
+  color: #111;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+/* ── INPUT BAR ── */
+.input-bar {
+  padding: 16px 20px 14px;
+  background: var(--input-bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.input-row label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #999;
+  width: 50px;
+  flex-shrink: 0;
+}
+.input-row select, .input-row input {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #fff;
+  color: #111;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+}
+.input-row select { appearance: none; -webkit-appearance: none; padding-right: 24px; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+.input-row input { width: 100px; flex: none; text-align: right; }
+.input-row select:focus, .input-row input:focus { border-color: #111; }
+.avg-toggle {
+  font-family: inherit;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fff;
+  color: #999;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.avg-toggle.active { background: #111; color: #fff; border-color: #111; }
+
+/* ── SPLIT PANELS ── */
+.split { flex: 1; display: flex; flex-direction: column; }
+
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 28px 20px;
+  text-align: center;
+  min-height: 160px;
+}
+.panel-bank { background: var(--bank-bg); }
+.panel-wf { background: var(--wf-bg); }
+
+.panel-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  margin-bottom: 4px;
+}
+.panel-bank .panel-label { color: var(--bank-text); }
+.panel-wf .panel-label { color: var(--wf-text); }
+
+.panel-provider {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.panel-bank .panel-provider { color: var(--bank-num); }
+.panel-wf .panel-provider { color: var(--wf-num); }
+
+.panel-caption {
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+.panel-bank .panel-caption { color: var(--bank-text); }
+.panel-wf .panel-caption { color: var(--wf-text); }
+
+.panel-amount {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1;
+  transition: all .3s ease;
+}
+.panel-bank .panel-amount { color: var(--bank-num); }
+.panel-wf .panel-amount { color: var(--wf-num); }
+
+.panel-detail {
+  font-size: 10px;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+.panel-bank .panel-detail { color: var(--bank-text); }
+.panel-wf .panel-detail { color: rgba(255,255,255,.4); }
+
+/* ── SAVINGS STRIP ── */
+.savings-strip {
+  background: var(--save-bg);
+  color: var(--save-text);
+  text-align: center;
+  padding: 18px 20px;
+}
+.savings-strip .save-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  opacity: .7;
+  margin-bottom: 4px;
+}
+.savings-strip .save-amount {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1;
+  transition: all .3s ease;
+}
+.savings-strip .save-sub {
+  font-size: 10px;
+  opacity: .7;
+  margin-top: 6px;
+}
+.savings-strip.negative { background: #888; }
+
+/* ── FOOTER ── */
+.footer {
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 9px;
+  color: #ccc;
+  letter-spacing: .04em;
+}
+.footer a { color: #999; text-decoration: none; }
+
+/* ── ANIMATIONS ── */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate .panel-amount, .animate .save-amount {
+  animation: countUp .35s ease both;
+}
+
+/* ── RESPONSIVE ── */
+@media (min-height: 700px) {
+  .panel { min-height: 200px; padding: 36px 20px; }
+  .panel-amount { font-size: 42px; }
+  .savings-strip .save-amount { font-size: 36px; }
+}
+@media (min-height: 800px) {
+  .panel { min-height: 220px; }
+}
+</style>
+</head>
+<body>
+
+<!-- INPUT BAR -->
+<div class="input-bar">
+  <div class="input-row">
+    <label>From</label>
+    <select id="countrySelect"></select>
+    <select id="bankSelect"><option value="">Select bank</option></select>
+    <button class="avg-toggle" id="avgToggle">Avg</button>
+  </div>
+  <div class="input-row">
+    <label>Send</label>
+    <span style="font-size:14px;font-weight:700;color:#999">$</span>
+    <input type="text" inputmode="numeric" id="amtInput" value="10,000" autocomplete="off">
+    <span style="font-size:10px;color:#999;flex-shrink:0">→ CNY</span>
+  </div>
+</div>
+
+<!-- SPLIT -->
+<div class="split">
+  <div class="panel panel-bank">
+    <div class="panel-label">Your bank</div>
+    <div class="panel-provider" id="bankName">HSBC</div>
+    <div class="panel-caption">Supplier receives</div>
+    <div class="panel-amount" id="bankReceives">$97,695</div>
+    <div class="panel-detail" id="bankDetail">~2.3% FX markup + $5 wire</div>
+  </div>
+  <div class="panel panel-wf">
+    <div class="panel-label">WorldFirst</div>
+    <div class="panel-provider">WorldFirst</div>
+    <div class="panel-caption">Supplier receives</div>
+    <div class="panel-amount" id="wfReceives">$99,100</div>
+    <div class="panel-detail" id="wfDetail">0.50% FX + 0.40% China payment</div>
+  </div>
+</div>
+
+<!-- SAVINGS -->
+<div class="savings-strip" id="savingsStrip">
+  <div class="save-label">You save</div>
+  <div class="save-amount" id="saveAmount">$1,405</div>
+  <div class="save-sub" id="saveSub">per order</div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  Estimates based on published rates, Apr 2026 &middot; <a href="https://worldfirst.com">worldfirst.com</a>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA (from corridor research + handbook)
+// ═══════════════════════════════════════
+const D={
+GB:{name:"United Kingdom",flag:"\u{1F1EC}\u{1F1E7}",cur:"GBP",sym:"\u00A3",
+  wf:{fx:0.5,pay:0.40,label:"0.50% FX + 0.40% China payment"},bankAvg:3.1,
+  banks:[
+    {n:"HSBC",fx:2.3,w:5},{n:"Barclays",fx:3.25,w:0},{n:"NatWest",fx:4.0,w:0},
+    {n:"Lloyds",fx:3.55,w:0},{n:"Santander UK",fx:3.0,w:25},{n:"Halifax",fx:3.55,w:10},
+    {n:"Metro Bank",fx:5.5,w:25}
+  ]},
+AU:{name:"Australia",flag:"\u{1F1E6}\u{1F1FA}",cur:"AUD",sym:"A$",
+  wf:{fx:0.67,pay:0.40,label:"0.67% FX + 0.40% China payment"},bankAvg:7.5,
+  banks:[
+    {n:"CBA",fx:8.8,w:0},{n:"NAB",fx:10.4,w:0},{n:"ANZ",fx:3.75,w:9},{n:"Westpac",fx:3.5,w:0}
+  ]},
+DE:{name:"Germany",flag:"\u{1F1E9}\u{1F1EA}",cur:"EUR",sym:"\u20AC",
+  wf:{fx:0.75,pay:0.40,label:"0.75% FX + 0.40% China payment"},bankAvg:5.0,
+  banks:[
+    {n:"Deutsche Bank",fx:3.5,w:15},{n:"Commerzbank",fx:3.0,w:12},{n:"Sparkasse",fx:4.0,w:15},{n:"Volksbank",fx:4.5,w:15}
+  ]},
+FR:{name:"France",flag:"\u{1F1EB}\u{1F1F7}",cur:"EUR",sym:"\u20AC",
+  wf:{fx:0.75,pay:0.40,label:"0.75% FX + 0.40% China payment"},bankAvg:2.8,
+  banks:[
+    {n:"BNP Paribas",fx:1.5,w:10},{n:"Soci\u00E9t\u00E9 G\u00E9n\u00E9rale",fx:2.5,w:12},
+    {n:"Cr\u00E9dit Agricole",fx:3.0,w:10},{n:"Banque Populaire",fx:2.8,w:10}
+  ]},
+NL:{name:"Netherlands",flag:"\u{1F1F3}\u{1F1F1}",cur:"EUR",sym:"\u20AC",
+  wf:{fx:0.75,pay:0.40,label:"0.75% FX + 0.40% China payment"},bankAvg:3.0,
+  banks:[
+    {n:"ING",fx:0.85,w:6},{n:"ABN AMRO",fx:3.0,w:10},{n:"Rabobank",fx:3.5,w:10}
+  ]},
+TR:{name:"Turkey",flag:"\u{1F1F9}\u{1F1F7}",cur:"TRY",sym:"\u20BA",
+  wf:{fx:0.75,pay:0.70,label:"0.75% FX + 0.70% payment"},bankAvg:10.4,
+  banks:[
+    {n:"Garanti BBVA",fx:2.25,w:30},{n:"\u0130\u015F Bankas\u0131",fx:2.5,w:30},
+    {n:"Ziraat Bankas\u0131",fx:1.75,w:25},{n:"Akbank",fx:2.25,w:30},
+    {n:"Yap\u0131 Kredi",fx:2.25,w:30},{n:"DenizBank",fx:2.5,w:35}
+  ]},
+VN:{name:"Vietnam",flag:"\u{1F1FB}\u{1F1F3}",cur:"VND",sym:"\u20AB",
+  wf:{fx:1.5,pay:0.40,label:"1.50% FX + 0.40% China payment"},bankAvg:3.5,
+  banks:[
+    {n:"Vietcombank",fx:1.0,w:20},{n:"BIDV",fx:1.0,w:18},{n:"VietinBank",fx:1.0,w:20},
+    {n:"Techcombank",fx:1.4,w:25},{n:"MB Bank",fx:1.4,w:20},{n:"Sacombank",fx:1.75,w:20}
+  ]},
+NG:{name:"Nigeria",flag:"\u{1F1F3}\u{1F1EC}",cur:"NGN",sym:"\u20A6",
+  wf:{fx:1.5,pay:3.0,label:"1.50% FX + 3.00% payment"},bankAvg:4.5,
+  banks:[
+    {n:"Zenith Bank",fx:2.5,w:35},{n:"GTBank",fx:2.25,w:25},{n:"First Bank",fx:3.0,w:35},
+    {n:"Access Bank",fx:3.0,w:35},{n:"UBA",fx:3.0,w:30},{n:"Stanbic IBTC",fx:2.25,w:40}
+  ]},
+PK:{name:"Pakistan",flag:"\u{1F1F5}\u{1F1F0}",cur:"PKR",sym:"Rs",
+  wf:{fx:1.5,pay:1.5,label:"1.50% FX + 1.50% payment"},bankAvg:5.0,
+  banks:[
+    {n:"HBL",fx:2.25,w:25},{n:"MCB Bank",fx:2.0,w:25},{n:"UBL",fx:2.25,w:25},
+    {n:"Bank Alfalah",fx:2.0,w:25},{n:"Standard Chartered",fx:1.75,w:30},{n:"Meezan Bank",fx:2.75,w:25}
+  ]},
+BD:{name:"Bangladesh",flag:"\u{1F1E7}\u{1F1E9}",cur:"BDT",sym:"\u09F3",
+  wf:{fx:1.5,pay:1.5,label:"1.50% FX + 1.50% payment"},bankAvg:3.0,
+  banks:[
+    {n:"Sonali Bank",fx:0.4,w:25},{n:"BRAC Bank",fx:0.6,w:30},{n:"Dutch-Bangla Bank",fx:0.6,w:25},
+    {n:"Eastern Bank",fx:0.55,w:30},{n:"Standard Chartered",fx:0.7,w:40}
+  ]},
+AE:{name:"UAE",flag:"\u{1F1E6}\u{1F1EA}",cur:"AED",sym:"AED",
+  wf:{fx:0.75,pay:1.5,label:"0.75% FX + 1.50% payment"},bankAvg:3.0,
+  banks:[
+    {n:"Emirates NBD",fx:2.0,w:7},{n:"First Abu Dhabi Bank",fx:1.5,w:10},
+    {n:"ADCB",fx:1.5,w:6},{n:"Mashreq",fx:1.5,w:8},{n:"Dubai Islamic Bank",fx:1.75,w:8}
+  ]},
+SA:{name:"Saudi Arabia",flag:"\u{1F1F8}\u{1F1E6}",cur:"SAR",sym:"SAR",
+  wf:{fx:0.75,pay:1.5,label:"0.75% FX + 1.50% payment"},bankAvg:3.25,
+  banks:[
+    {n:"Saudi National Bank",fx:1.75,w:15},{n:"Al Rajhi Bank",fx:1.7,w:11},
+    {n:"Riyad Bank",fx:1.75,w:12},{n:"Saudi Awwal Bank",fx:1.75,w:13},{n:"Banque Saudi Fransi",fx:2.0,w:14}
+  ]},
+TH:{name:"Thailand",flag:"\u{1F1F9}\u{1F1ED}",cur:"THB",sym:"\u0E3F",
+  wf:{fx:1.5,pay:0.40,label:"1.50% FX + 0.40% China payment"},bankAvg:3.0,
+  banks:[
+    {n:"Bangkok Bank",fx:2.5,w:10},{n:"Kasikornbank",fx:2.5,w:7},
+    {n:"SCB",fx:2.0,w:10},{n:"Krung Thai Bank",fx:2.5,w:8}
+  ]},
+ID:{name:"Indonesia",flag:"\u{1F1EE}\u{1F1E9}",cur:"IDR",sym:"Rp",
+  wf:{fx:1.5,pay:0.40,label:"1.50% FX + 0.40% China payment"},bankAvg:3.25,
+  banks:[
+    {n:"BCA",fx:3.0,w:20},{n:"Bank Mandiri",fx:3.0,w:25},{n:"Bank BNI",fx:3.0,w:20},{n:"Bank Rakyat",fx:3.5,w:20}
+  ]},
+IN:{name:"India",flag:"\u{1F1EE}\u{1F1F3}",cur:"INR",sym:"\u20B9",
+  wf:{fx:1.5,pay:3.0,label:"1.50% FX + 3.00% payment"},bankAvg:3.5,
+  banks:[
+    {n:"State Bank of India",fx:2.0,w:15},{n:"ICICI Bank",fx:2.5,w:15},
+    {n:"HDFC Bank",fx:3.25,w:15},{n:"Axis Bank",fx:2.75,w:15}
+  ]}
+};
+const REGIONS=["GB","AU","DE","FR","NL","TR","VN","NG","PK","BD","AE","SA","TH","ID","IN"];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let region="GB", bankIdx=0, amount=10000, useAvg=false;
+
+// ═══════════════════════════════════════
+// URL PARAMS — deep link support
+// ═══════════════════════════════════════
+const params=new URLSearchParams(window.location.search);
+if(params.get('c')&&D[params.get('c').toUpperCase()])region=params.get('c').toUpperCase();
+if(params.get('a'))amount=parseInt(params.get('a'))||10000;
+if(params.get('avg')==='1')useAvg=true;
+
+// ═══════════════════════════════════════
+// BUILD SELECTS
+// ═══════════════════════════════════════
+const countrySelect=document.getElementById('countrySelect');
+const bankSelect=document.getElementById('bankSelect');
+const amtInput=document.getElementById('amtInput');
+const avgToggle=document.getElementById('avgToggle');
+
+REGIONS.forEach(code=>{
+  const o=document.createElement('option');
+  o.value=code;
+  o.textContent=D[code].flag+' '+D[code].name;
+  if(code===region)o.selected=true;
+  countrySelect.appendChild(o);
+});
+
+function populateBanks(){
+  const r=D[region];
+  bankSelect.innerHTML='';
+  r.banks.forEach((b,i)=>{
+    const o=document.createElement('option');
+    o.value=i;o.textContent=b.n;
+    bankSelect.appendChild(o);
+  });
+  // Check URL param for bank
+  if(params.get('b')){
+    const bName=params.get('b').toLowerCase();
+    const idx=r.banks.findIndex(b=>b.n.toLowerCase().includes(bName));
+    if(idx>=0){bankIdx=idx;bankSelect.value=idx;}
+    else bankIdx=0;
+  } else bankIdx=0;
+  bankSelect.value=bankIdx;
+}
+populateBanks();
+amtInput.value=amount.toLocaleString('en-US');
+if(useAvg)avgToggle.classList.add('active');
+
+// ═══════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════
+countrySelect.addEventListener('change',()=>{
+  region=countrySelect.value;
+  populateBanks();
+  render();
+});
+bankSelect.addEventListener('change',()=>{
+  bankIdx=parseInt(bankSelect.value)||0;
+  useAvg=false;avgToggle.classList.remove('active');
+  render();
+});
+amtInput.addEventListener('input',()=>{
+  let raw=amtInput.value.replace(/[^0-9]/g,'');
+  if(raw===''){amount=0;amtInput.value='';}
+  else{amount=parseInt(raw,10);amtInput.value=amount.toLocaleString('en-US');}
+  render();
+});
+avgToggle.addEventListener('click',()=>{
+  useAvg=!useAvg;
+  avgToggle.classList.toggle('active',useAvg);
+  render();
+});
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+const $=id=>document.getElementById(id);
+const fmt=n=>'$'+Math.round(n).toLocaleString('en-US');
+
+function render(){
+  const r=D[region], wf=r.wf, amt=amount||10000;
+  const bank=r.banks[bankIdx]||r.banks[0];
+
+  // Bank cost
+  let bankFx, bankWire, bankLabel;
+  if(useAvg){
+    bankFx=r.bankAvg;
+    bankWire=0;
+    bankLabel=r.name+' banks (avg)';
+  } else {
+    bankFx=bank.fx;
+    bankWire=bank.w;
+    bankLabel=bank.n;
+  }
+  const bankCost=amt*(bankFx/100)+bankWire;
+  const bankReceives=amt-bankCost;
+
+  // WF cost
+  const wfTotal=wf.fx+wf.pay;
+  const wfCost=amt*(wfTotal/100);
+  const wfReceives=amt-wfCost;
+
+  // Savings
+  const saving=bankCost-wfCost;
+
+  // Animate
+  document.querySelector('.split').classList.remove('animate');
+  document.querySelector('.savings-strip').classList.remove('animate');
+  void document.querySelector('.split').offsetWidth; // reflow
+  document.querySelector('.split').classList.add('animate');
+  document.querySelector('.savings-strip').classList.add('animate');
+
+  // Bank panel
+  $('bankName').textContent=bankLabel;
+  $('bankReceives').textContent=fmt(bankReceives);
+  $('bankDetail').textContent=useAvg
+    ?`~${bankFx.toFixed(1)}% average total cost`
+    :`~${bankFx.toFixed(1)}% FX markup${bankWire>0?' + '+fmt(bankWire)+' wire':''}`;
+
+  // WF panel
+  $('wfReceives').textContent=fmt(wfReceives);
+  $('wfDetail').textContent=wf.label;
+
+  // Savings strip
+  const strip=$('savingsStrip');
+  if(saving>0){
+    $('saveAmount').textContent=fmt(saving);
+    $('saveSub').textContent='per order \u00B7 '+fmt(saving*10)+' over 10 orders';
+    strip.classList.remove('negative');
+  } else {
+    $('saveAmount').textContent='Similar cost';
+    $('saveSub').textContent='WorldFirst advantages: speed, currency flexibility, 1688 integration';
+    strip.classList.add('negative');
+  }
+}
+
+render();
+</script>
+</body>
+</html>
