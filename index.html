@@ -447,24 +447,12 @@ function populateBanks(){
 }
 
 function populateCurrencies(){
-  const r=D[region];
-  const local=r.cur;
-  // Build unique options: USD, EUR, CNY, + local if different
-  const opts=[];
-  if(local!=='USD'&&local!=='EUR')opts.push({v:local,t:local});
-  opts.push({v:'USD',t:'USD'});
-  if(local!=='EUR')opts.push({v:'EUR',t:'EUR'});
-  opts.push({v:'CNY',t:'CNY'});
-
-  const prev=curSelect.value;
   curSelect.innerHTML='';
-  opts.forEach(o=>{
+  [{v:'USD',t:'USD'},{v:'CNY',t:'CNY'}].forEach(o=>{
     const el=document.createElement('option');
     el.value=o.v;el.textContent=o.t;curSelect.appendChild(el);
   });
-  // Keep previous selection if still valid, else default to USD
-  if(opts.some(o=>o.v===prev))curSelect.value=prev;
-  else curSelect.value='USD';
+  curSelect.value='USD';
 }
 
 populateBanks();
