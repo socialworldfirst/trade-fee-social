@@ -131,6 +131,52 @@ body {
 .panel-bank .panel-detail { color: var(--bank-text); }
 .panel-wf .panel-detail { color: rgba(255,255,255,.4); }
 
+/* ── EXPAND DROPDOWN ── */
+.expand-btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(128,128,128,.3);
+  background: transparent;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all .15s;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.panel-bank .expand-btn { color: var(--bank-text); }
+.panel-bank .expand-btn:hover { background: rgba(0,0,0,.05); }
+.panel-wf .expand-btn { color: var(--wf-text); border-color: rgba(255,255,255,.2); }
+.panel-wf .expand-btn:hover { background: rgba(255,255,255,.1); }
+.expand-btn.open { transform: rotate(45deg); }
+
+.expand-body {
+  display: none;
+  width: 100%;
+  max-width: 300px;
+  text-align: left;
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.expand-body.open { display: block; }
+.expand-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(128,128,128,.15);
+}
+.expand-row:last-child { border-bottom: none; }
+.panel-bank .expand-row .el { color: var(--bank-text); }
+.panel-bank .expand-row .ev { color: var(--bank-num); font-weight: 700; }
+.panel-wf .expand-row .el { color: var(--wf-text); }
+.panel-wf .expand-row .ev { color: var(--wf-num); font-weight: 700; }
+
 /* ── SAVINGS STRIP ── */
 .savings-strip {
   background: var(--save-bg);
@@ -228,6 +274,8 @@ body {
     <div class="panel-caption">Supplier receives</div>
     <div class="panel-amount" id="bankReceives">$97,695</div>
     <div class="panel-detail" id="bankDetail">~2.3% FX markup + $5 wire</div>
+    <button class="expand-btn" id="bankExpand">+</button>
+    <div class="expand-body" id="bankExpandBody"></div>
   </div>
   <div class="panel panel-wf">
     <div class="panel-label">WorldFirst</div>
@@ -235,6 +283,8 @@ body {
     <div class="panel-caption">Supplier receives</div>
     <div class="panel-amount" id="wfReceives">$99,100</div>
     <div class="panel-detail" id="wfDetail">0.50% FX + 0.40% China payment</div>
+    <button class="expand-btn" id="wfExpand">+</button>
+    <div class="expand-body" id="wfExpandBody"></div>
   </div>
 </div>
 
@@ -497,6 +547,24 @@ function render(){
   $('wfReceives').textContent=fmt(wfReceives);
   $('wfDetail').textContent=wf.label;
 
+  // Expand bodies
+  const bankFxCost=amt*(bankFx/100);
+  $('bankExpandBody').innerHTML=
+    `<div class="expand-row"><span class="el">You send</span><span class="ev">${fmt(amt)}</span></div>`+
+    `<div class="expand-row"><span class="el">FX markup (~${bankFx.toFixed(1)}%)</span><span class="ev">\u2212${fmt(bankFxCost)}</span></div>`+
+    (bankWire>0?`<div class="expand-row"><span class="el">Wire / SWIFT fee</span><span class="ev">\u2212${fmt(bankWire)}</span></div>`:'')+
+    `<div class="expand-row"><span class="el">Total cost</span><span class="ev">\u2212${fmt(bankCost)}</span></div>`+
+    `<div class="expand-row"><span class="el">Supplier receives</span><span class="ev">${fmt(bankReceives)}</span></div>`;
+
+  const wfFxCost=amt*(wf.fx/100);
+  const wfPayCost=amt*(wf.pay/100);
+  $('wfExpandBody').innerHTML=
+    `<div class="expand-row"><span class="el">You send</span><span class="ev">${fmt(amt)}</span></div>`+
+    `<div class="expand-row"><span class="el">FX (${wf.fx}%)</span><span class="ev">\u2212${fmt(wfFxCost)}</span></div>`+
+    `<div class="expand-row"><span class="el">Payment fee (${wf.pay}%)</span><span class="ev">\u2212${fmt(wfPayCost)}</span></div>`+
+    `<div class="expand-row"><span class="el">Total cost</span><span class="ev">\u2212${fmt(wfCost)}</span></div>`+
+    `<div class="expand-row"><span class="el">Supplier receives</span><span class="ev">${fmt(wfReceives)}</span></div>`;
+
   // Savings strip
   const strip=$('savingsStrip');
   if(saving>0){
@@ -511,6 +579,16 @@ function render(){
 }
 
 render();
+
+// Expand toggles
+document.getElementById('bankExpand').addEventListener('click',function(){
+  this.classList.toggle('open');
+  document.getElementById('bankExpandBody').classList.toggle('open');
+});
+document.getElementById('wfExpand').addEventListener('click',function(){
+  this.classList.toggle('open');
+  document.getElementById('wfExpandBody').classList.toggle('open');
+});
 </script>
 </body>
 </html>
