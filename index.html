@@ -208,30 +208,15 @@ body {
 <!-- INPUT BAR -->
 <div class="input-bar">
   <div class="input-row">
-    <label>Send</label>
-    <select id="curSelect" style="flex:0 0 72px">
-      <option value="USD" selected>USD</option>
-      <option value="GBP">GBP</option>
-      <option value="EUR">EUR</option>
-      <option value="AUD">AUD</option>
-      <option value="AED">AED</option>
-      <option value="SAR">SAR</option>
-      <option value="TRY">TRY</option>
-      <option value="VND">VND</option>
-      <option value="NGN">NGN</option>
-      <option value="PKR">PKR</option>
-      <option value="BDT">BDT</option>
-      <option value="THB">THB</option>
-      <option value="IDR">IDR</option>
-      <option value="INR">INR</option>
-    </select>
-    <input type="text" inputmode="numeric" id="amtInput" value="10,000" autocomplete="off">
-    <span style="font-size:10px;color:#999;flex-shrink:0">to China</span>
-  </div>
-  <div class="input-row">
     <label>From</label>
     <select id="countrySelect"></select>
     <select id="bankSelect"><option value="">Select bank</option></select>
+  </div>
+  <div class="input-row">
+    <label>Send</label>
+    <select id="curSelect" style="flex:0 0 72px"></select>
+    <input type="text" inputmode="numeric" id="amtInput" value="10,000" autocomplete="off">
+    <span style="font-size:10px;color:#999;flex-shrink:0">to China</span>
   </div>
 </div>
 
@@ -389,18 +374,17 @@ REGIONS.forEach(code=>{
   countrySelect.appendChild(o);
 });
 
+const curSelect=document.getElementById('curSelect');
+
 function populateBanks(){
   const r=D[region];
   bankSelect.innerHTML='';
-  // Average option first
   const avg=document.createElement('option');
   avg.value='avg';avg.textContent=r.name+' banks (avg)';
   bankSelect.appendChild(avg);
-  // Individual banks
   r.banks.forEach((b,i)=>{
     const o=document.createElement('option');o.value=i;o.textContent=b.n;bankSelect.appendChild(o);
   });
-  // Check URL param for bank
   if(params.get('b')){
     const bName=params.get('b').toLowerCase();
     if(bName==='avg'){useAvg=true;bankSelect.value='avg';}
@@ -409,12 +393,32 @@ function populateBanks(){
       if(idx>=0){bankIdx=idx;useAvg=false;bankSelect.value=idx;}
       else{useAvg=true;bankSelect.value='avg';}
     }
-  } else {
-    // Default to average
-    useAvg=true;bankSelect.value='avg';
-  }
+  } else {useAvg=true;bankSelect.value='avg';}
 }
+
+function populateCurrencies(){
+  const r=D[region];
+  const local=r.cur;
+  // Build unique options: USD, EUR, CNY, + local if different
+  const opts=[];
+  if(local!=='USD'&&local!=='EUR')opts.push({v:local,t:local});
+  opts.push({v:'USD',t:'USD'});
+  if(local!=='EUR')opts.push({v:'EUR',t:'EUR'});
+  opts.push({v:'CNY',t:'CNY'});
+
+  const prev=curSelect.value;
+  curSelect.innerHTML='';
+  opts.forEach(o=>{
+    const el=document.createElement('option');
+    el.value=o.v;el.textContent=o.t;curSelect.appendChild(el);
+  });
+  // Keep previous selection if still valid, else default to USD
+  if(opts.some(o=>o.v===prev))curSelect.value=prev;
+  else curSelect.value='USD';
+}
+
 populateBanks();
+populateCurrencies();
 amtInput.value=amount.toLocaleString('en-US');
 
 // ═══════════════════════════════════════
@@ -423,6 +427,7 @@ amtInput.value=amount.toLocaleString('en-US');
 countrySelect.addEventListener('change',()=>{
   region=countrySelect.value;
   populateBanks();
+  populateCurrencies();
   render();
 });
 bankSelect.addEventListener('change',()=>{
