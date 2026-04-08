@@ -486,7 +486,7 @@ document.getElementById('curSelect').addEventListener('change',()=>{render();});
 // RENDER
 // ═══════════════════════════════════════
 const $=id=>document.getElementById(id);
-const curSyms={USD:'$',GBP:'\u00A3',EUR:'\u20AC',AUD:'A$',AED:'AED ',SAR:'SAR ',TRY:'\u20BA',VND:'\u20AB',NGN:'\u20A6',PKR:'Rs',BDT:'\u09F3',THB:'\u0E3F',IDR:'Rp',INR:'\u20B9'};
+const curSyms={USD:'$',CNY:'\u00A5',GBP:'\u00A3',EUR:'\u20AC',AUD:'A$',AED:'AED ',SAR:'SAR ',TRY:'\u20BA',VND:'\u20AB',NGN:'\u20A6',PKR:'Rs',BDT:'\u09F3',THB:'\u0E3F',IDR:'Rp',INR:'\u20B9'};
 
 function render(){
   const r=D[region], wf=r.wf, amt=amount||10000;
